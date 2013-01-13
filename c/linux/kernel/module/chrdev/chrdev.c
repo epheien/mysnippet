@@ -1,5 +1,6 @@
 /*                                                     
  * 字符设备模板
+ * 未加锁
  */                                                    
 #include <linux/init.h>
 #include <linux/module.h>
@@ -20,6 +21,10 @@
 
 /* 环形缓冲区 */
 static char *g_ring_buff = NULL;
+/* 环形缓冲区的有效数据长度 */
+static size_t g_ring_buff_len = 0;
+/* 环形缓冲区的起始指针 - 暂不支持 */
+/*static char *g_ring_buff_cursor = NULL;*/
 /* 环形缓冲区环的尺寸 */
 static unsigned long g_ring_buff_size = 1024;
 module_param_named(size, g_ring_buff_size, ulong, 0644);
@@ -46,42 +51,64 @@ static int chrdev_release(struct inode *inode, struct file *filp)
  * 返回:
  * < 0	错误
  * 0	到达文件尾部
- * > 0	传输成功的数目
+ * > 0	传输成功的数量。如果 < count，则会重试，如果 == count，表示完全成功
+ *
+ * 一般的读取过程是，一直读取直到返回 0
  * */
 static ssize_t chrdev_read(struct file *filp, char __user *buf, size_t count,
 			   loff_t *f_pos)
 {
-	if (count > g_ring_buff_size)
-		count = g_ring_buff_size;
+	size_t read_count = 0;
 
-	if (copy_to_user(buf, g_ring_buff, count))
+	if (g_ring_buff_len == 0)
+		goto out;
+
+	/* 由于 g_ring_buff_len 一直更新，所以只要这个无须检查 *f_pos */
+	if (count > g_ring_buff_len)
+		read_count = g_ring_buff_len;
+	else
+		read_count = count;
+
+	if (copy_to_user(buf, g_ring_buff + *f_pos, read_count))
 		return -EFAULT;
 
-	/* 读完之后，清空 */
-	/*memset(g_ring_buff, 0, g_ring_buff_size);*/
+	/* 清空读过的内容 */
+	memset(g_ring_buff + *f_pos, 0, read_count);
 
-	/* 暂时只支持一次读取 */
-	return 0;
+	*f_pos += read_count;
+	g_ring_buff_len -= read_count;
+
+out:
+	return read_count;
 }
 
 /* 
  * 返回:
  * < 0	错误
- * >= 0	写入的数量，如果调用者发现返回值小于 count，则会重复调用
+ * >= 0	成功写入的数量。如果 < count，则会重试，如果 == count，表示完全成功
  * */
 static ssize_t chrdev_write(struct file *filp, const char __user *buf,
 			    size_t count, loff_t *f_pos)
 {
-	if (count > g_ring_buff_size)
-		return -EINVAL;
+	ssize_t write_count = -ENOMEM;
 
-	/* 暂时只支持写开头部分 */
-	if (copy_from_user(g_ring_buff, buf, count))
+	/* 不支持写入过多的内容，*f_pos 是索引 */
+	if (*f_pos >= g_ring_buff_size)
+		goto out;
+
+	if (*f_pos + count > g_ring_buff_size)
+		write_count = g_ring_buff_size - *f_pos;
+	else
+		write_count = count;
+
+	if (copy_from_user(g_ring_buff + *f_pos, buf, write_count))
 		return -EFAULT;
 
-	f_pos += count;
+	*f_pos += write_count;
+	g_ring_buff_len = *f_pos;
 
-	return count;
+out:
+	return write_count;
 }
 
 static struct file_operations chrdev_ops = {
@@ -99,7 +126,7 @@ static int chrdev_setup(struct cdev *dev, struct file_operations *fops)
 
 	cdev_init(dev, fops);
 	dev->owner = THIS_MODULE;
-	/*dev->ops = fops;*/
+	/* cdev_add() 就把 devno 绑定到字符设备了 */
 	err = cdev_add(dev, devno, 1);
 	if (err < 0)
 		return err;
@@ -125,16 +152,13 @@ static int __init chrdev_init(void)
 	} else {
 		/* 动态分配 */
 		result = alloc_chrdev_region(&devno, 0, 1, DRV_NAME);
+		chrdev_major = MAJOR(devno);
 	}
 
 	if (result < 0) {
 		printk(KERN_WARNING "%s: failed to get major %d\n",
 		       DRV_NAME, chrdev_major);
 		return result;
-	}
-
-	if (chrdev_major == 0) {
-		chrdev_major = MAJOR(devno);
 	}
 
 	result = chrdev_setup(&chrdev, &chrdev_ops);
