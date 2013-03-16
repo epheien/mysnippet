@@ -17,7 +17,7 @@ $(module)-objs :=
 $(module)-objs += 
 
 ifeq ($(DEBUG),y)
-  DEBUG_CFLAGS := -O1 -g
+  DEBUG_CFLAGS := -O0 -g
 else
   DEBUG_CFLAGS := -O2
 endif

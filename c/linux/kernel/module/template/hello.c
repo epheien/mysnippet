@@ -4,6 +4,10 @@
 #include <linux/init.h>
 #include <linux/module.h>
 
+#ifndef __always_inline
+# define __always_inline	inline __attribute__((always_inline))
+#endif
+
 #define DRV_NAME	"hello"
 #define DRV_VERSION	"1.0"
 #define DRV_DESCRIPTION	"hello module"
