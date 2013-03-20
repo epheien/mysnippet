@@ -37,14 +37,16 @@ KERNELDIR ?= /lib/modules/$(shell uname -r)/build
 # 此文件所在目录
 PWD := $(shell pwd)
 
+RECIPE = $(MAKE) -C $(KERNELDIR) M=$(PWD) $@
+
 modules:
-	$(MAKE) -C $(KERNELDIR) M="$(PWD)" modules
+	$(RECIPE)
 
 modules_install:
-	$(MAKE) -C $(KERNELDIR) M="$(PWD)" modules_install
+	$(RECIPE)
 
 clean:
-	rm -rf *.o .*.cmd *.ko *.mod.c .tmp_versions modules.order Module.symvers
+	$(RECIPE)
 
 .PHONY: modules modules_install clean
 endif
