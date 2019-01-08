@@ -1,2 +1,2 @@
-# CodeX
-My Code Sample
+# mysnippet
+my code snippet
