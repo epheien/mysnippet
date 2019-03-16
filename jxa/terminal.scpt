@@ -27,18 +27,7 @@ function shellescape(string) {
   let finder = Application('Finder');
   let cwd = pathOfFinderWindow(finder);
   let terminal = Application('terminal');
-  let length = terminal.windows.length;
   let cmd = 'cd ' + shellescape(cwd) + ' && open -a Terminal'
+  //let cmd = 'open -a Terminal ' + shellescape(cwd);
   terminal.doScript(cmd);
-  //terminal.doScript(shellescape(cwd));
-  //terminal.activate();
-  return;
-  for (let i = 0; i < 100; i++) {
-    if (length != terminal.windows.length) {
-      break
-    }
-    delay(0.01);
-  }
-  se.processes['Terminal'].windows[0].actions['AXRaise'].perform();
-  se.keystroke('	', {using: 'command down'});
 })();
