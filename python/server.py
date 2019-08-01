@@ -121,7 +121,19 @@ def main(argv):
     app.router.add_post('/', post_handler)
     app.router.add_get('/{name}', get_handler)
     app.router.add_post('/{name}', post_handler)
-    web.run_app(app, host=host, port=port)
+    #web.run_app(app, host=host, port=port)
+    loop = asyncio.get_event_loop()
+    # NOTE: 3.2 后废弃, 不更新的话可用, 更新的话有可能拿不到监听的端口
+    coro = loop.create_server(app.make_handler(), host, port)
+    server = loop.run_until_complete(coro)
+    print('======== Running on http://%s:%s ========' % server.sockets[0].getsockname())
+    print('(Press CTRL+C to quit)')
+    try:
+        loop.run_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.close()
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
