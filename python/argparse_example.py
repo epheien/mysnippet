@@ -7,7 +7,9 @@ import argparse
 g_optarg = None
 
 def get_arg_parser():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument('-h', '--help', action='help',
+                        help='show this help message and exit')
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
     parser.add_argument('-v', '--verbose',
                         dest='verbose',
