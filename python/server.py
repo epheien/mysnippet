@@ -12,6 +12,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 import aiohttp
 from aiohttp import web
+import signal
 
 json_dumps = functools.partial(json.dumps, separators=(',', ':'))
 json_loads = json.loads
@@ -102,8 +103,13 @@ async def get_handler(request, **kwargs):
 async def post_handler(request, **kwargs):
     return await dump_request(request, **kwargs)
 
+def signal_handler(signum, frame):
+    asyncio.get_event_loop().stop()
+
 def main(argv):
     args = argv[1:]
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
 
     host = '127.0.0.1'
     port = 12345
