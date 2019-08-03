@@ -22,6 +22,7 @@ import (
 // 变量定义
 // type 可忽略, go 会自动推导类型
 var g_globalVar int = 10
+
 const g_constVar uint = 100
 
 // 函数定义
@@ -36,19 +37,18 @@ func funcArgs(args ...interface{}) {
 	if len(args) <= 0 {
 		return
 	}
-	funcArgs(args[: len(args)-1] ...)
+	funcArgs(args[:len(args)-1]...)
 }
 
 // 类以及方法
 type Rect struct {
-	width uint
+	width  uint
 	height uint
 }
 
 func (self Rect) area() uint {
 	return self.width * self.height
 }
-
 
 type Man struct {
 	name string
@@ -85,11 +85,11 @@ func gofunc(c, quit chan int) {
 
 // 反射
 func printType(v interface{}) {
-	switch v.(type) {
+	switch value := v.(type) {
 	case int:
-		fmt.Println("type of param is int")
+		fmt.Println("type of param is int", value)
 	default:
-		fmt.Println("unknown type")
+		fmt.Println("unknown type", value)
 	}
 }
 
@@ -103,7 +103,7 @@ func main() {
 	// 字典
 	// dict := make(map[string]int)
 	// dict["a"] = 1
-	dict := map[string]int {
+	dict := map[string]int{
 		"a": 1,
 		"b": 2,
 		"c": 3,
@@ -115,7 +115,7 @@ func main() {
 	fmt.Println(dict)
 
 	box := Rect{
-		width: 3,
+		width:  3,
 		height: 4,
 	}
 	fmt.Println("area of rectangle is", box.area())
