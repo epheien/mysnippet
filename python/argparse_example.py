@@ -7,7 +7,15 @@ import argparse
 g_optarg = None
 
 def get_arg_parser():
-    parser = argparse.ArgumentParser(add_help=False)
+    example_text = '''examples:
+    {cmd} --help
+    {cmd} --version
+    {cmd} -v
+    '''.format(cmd=__file__)
+
+    parser = argparse.ArgumentParser(add_help=False,
+                                     epilog=example_text,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-h', '--help', action='help',
                         help='show this help message and exit')
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
