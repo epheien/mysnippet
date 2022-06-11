@@ -11,7 +11,7 @@ def get_arg_parser():
     {cmd} --help
     {cmd} --version
     {cmd} -v
-    '''.format(cmd=__file__)
+    '''.format(cmd=sys.argv[0])
 
     parser = argparse.ArgumentParser(add_help=False,
                                      epilog=example_text,
