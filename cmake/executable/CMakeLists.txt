@@ -10,12 +10,12 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 option(BUILD_TESTS "build unit tests" OFF)
 option(BUILD_BENCHMARKS "build benchmarks" OFF)
 
+find_package(spdlog REQUIRED)
+
 set(COMMON_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 set(PRIVATE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
-
-find_package(spdlog REQUIRED)
 
 # XXX: CHANGE ME
 project(demo VERSION "0.0.1")
@@ -58,4 +58,30 @@ if(BUILD_TESTS)
     include(GoogleTest)
     # 此处添加单元测试
     add_unit_test(test_demo tests/demo.cpp)
+endif()
+
+macro(add_benchmark name)
+    set(sources ${ARGN})
+    set(prefixed_sources)
+    # 遍历每个源文件，并添加前缀路径
+    foreach(source IN LISTS sources)
+        list(APPEND prefixed_sources ${CMAKE_CURRENT_SOURCE_DIR}/${source})
+    endforeach()
+    message(STATUS "add_benchmark(${name} ${prefixed_sources})")
+
+    add_executable(${name} ${prefixed_sources})
+    target_include_directories(${name}
+        PRIVATE ${COMMON_INCLUDE_DIRS}
+        #PRIVATE ${GTest_INCLUDE_DIR}
+    )
+    target_link_libraries(
+        ${name}
+        benchmark::benchmark
+        spdlog::spdlog
+    )
+endmacro()
+
+if(BUILD_BENCHMARKS)
+    find_package(benchmark REQUIRED)
+    add_benchmark(benchmark_demo benchmarks/demo.cpp)
 endif()
