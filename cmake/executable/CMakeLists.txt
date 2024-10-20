@@ -6,6 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_options(-Wall)
 # 把 build/ 目录添加进模块搜索路径, 以支持 find_package 直接从 build/ 能查找成功
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 
 option(BUILD_TESTS "build unit tests" OFF)
 option(BUILD_BENCHMARKS "build benchmarks" OFF)
