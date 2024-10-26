@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_VERBOSE_MAKEFILE ON) # 打印详细的编译命令, 建议无脑打开以便核对
 
 add_compile_options(-Wall)
 # 把 build/ 目录添加进模块搜索路径, 以支持 find_package 直接从 build/ 能查找成功
