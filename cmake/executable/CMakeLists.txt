@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_VERBOSE_MAKEFILE ON) # 打印详细的编译命令, 建议无脑打开以便核对
 
 find_package(Git)
 if(NOT Git_FOUND)
@@ -29,17 +30,18 @@ configure_file(
 add_compile_options(-Wall)
 # 把 build/ 目录添加进模块搜索路径, 以支持 find_package 直接从 build/ 能查找成功
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 
 option(BUILD_TESTS "build unit tests" OFF)
 option(BUILD_BENCHMARKS "build benchmarks" OFF)
+
+find_package(spdlog REQUIRED)
 
 set(COMMON_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_BINARY_DIR}/generated
 )
 set(PRIVATE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
-
-find_package(spdlog REQUIRED)
 
 # XXX: CHANGE ME
 project(demo VERSION "0.0.1")
@@ -82,4 +84,30 @@ if(BUILD_TESTS)
     include(GoogleTest)
     # 此处添加单元测试
     add_unit_test(test_demo tests/demo.cpp)
+endif()
+
+macro(add_benchmark name)
+    set(sources ${ARGN})
+    set(prefixed_sources)
+    # 遍历每个源文件，并添加前缀路径
+    foreach(source IN LISTS sources)
+        list(APPEND prefixed_sources ${CMAKE_CURRENT_SOURCE_DIR}/${source})
+    endforeach()
+    message(STATUS "add_benchmark(${name} ${prefixed_sources})")
+
+    add_executable(${name} ${prefixed_sources})
+    target_include_directories(${name}
+        PRIVATE ${COMMON_INCLUDE_DIRS}
+        #PRIVATE ${GTest_INCLUDE_DIR}
+    )
+    target_link_libraries(
+        ${name}
+        benchmark::benchmark
+        spdlog::spdlog
+    )
+endmacro()
+
+if(BUILD_BENCHMARKS)
+    find_package(benchmark REQUIRED)
+    add_benchmark(benchmark_demo benchmarks/demo.cpp)
 endif()
