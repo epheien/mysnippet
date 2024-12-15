@@ -3,6 +3,29 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+find_package(Git)
+if(NOT Git_FOUND)
+    message(WARNING "Git not found, commit of version information will not be included.")
+endif()
+
+# 获取Git提交哈希
+execute_process(
+    COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_COMMIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# 版本信息
+set(VERSION_MAJOR 0)
+set(VERSION_MINOR 0)
+set(VERSION_PATCH 1)
+string(TIMESTAMP COMPILE_DATE "%Y-%m-%d")
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/version.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/generated/version.h
+)
+
 add_compile_options(-Wall)
 # 把 build/ 目录添加进模块搜索路径, 以支持 find_package 直接从 build/ 能查找成功
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
@@ -12,6 +35,7 @@ option(BUILD_BENCHMARKS "build benchmarks" OFF)
 
 set(COMMON_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_BINARY_DIR}/generated
 )
 set(PRIVATE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
