@@ -1,2 +1,8 @@
 __pycache__/
 .cache/
+
+GPATH
+GRTAGS
+GTAGS
+gtags.files
+gutags
