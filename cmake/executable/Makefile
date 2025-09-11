@@ -1,4 +1,4 @@
-.PHONEY: debug release clean
+.PHONY: debug release clean
 
 debug:
 	mkdir -p build && cd build; \
