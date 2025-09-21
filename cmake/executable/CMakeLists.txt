@@ -36,10 +36,13 @@ option(BUILD_TESTS "build unit tests" OFF)
 option(BUILD_BENCHMARKS "build benchmarks" OFF)
 
 find_package(spdlog REQUIRED)
+find_package(CLI11 REQUIRED)
 
 set(COMMON_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_BINARY_DIR}/generated
+    ${spdlog_INCLUDE_DIR}
+    ${CLI11_INCLUDE_DIR}
 )
 set(PRIVATE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -52,6 +55,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${COMMON_INCLUDE_DIRS})
 
 set(COMMON_LINK_LIBRARIES
     spdlog::spdlog
+    CLI11::CLI11
 )
 target_link_libraries(${PROJECT_NAME} ${COMMON_LINK_LIBRARIES})
 
