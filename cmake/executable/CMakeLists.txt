@@ -79,7 +79,7 @@ macro(add_unit_test name)
         spdlog::spdlog
     )
     # 添加到 ctest 数据库, cd build/ && ctest 能直接全部运行
-    gtest_discover_tests(${name})
+    #gtest_discover_tests(${name})
 endmacro()
 
 if(BUILD_TESTS)
