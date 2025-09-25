@@ -13,5 +13,10 @@ release:
 		cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_TESTS=ON -DBUILD_BENCHMARKS=ON ..; \
 		make -j2
 
+compile_commands:
+	mkdir -p build && cd build; \
+		conan install --build missing -s build_type=Debug ..; \
+		cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_TESTS=ON -DBUILD_BENCHMARKS=ON ..
+
 clean:
 	rm -rf build
