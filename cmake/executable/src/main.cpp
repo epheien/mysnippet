@@ -18,6 +18,7 @@ int main(int argc, char* argv[]) {
     app.add_flag("-v,--version", version, "print version and exit");
     app.add_option("-c,--config", config, "config file to read");
     app.add_option("args", args, "args...")->required()->expected(1);
+    app.footer([argv]() { return fmt::format("Example:\n  {} -c a.json", argv[0]); });
     CLI11_PARSE(app, argc, argv);
 
     if (version) {
